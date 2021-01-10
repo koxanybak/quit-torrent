@@ -1,18 +1,28 @@
 package torrent
 
-import "math/rand"
+import (
+	"log"
+	"math/rand"
+)
 
 // Process represents a torrent process
 type Process struct {
 	PeerID			[20]byte
 	Torrent			TorrentFile
 	Peers			[]Peer
+
 	paused			bool
+
+	done			chan struct{}
 }
 
 // Start starts the torrent process
 func (p *Process) Start() {
-	
+	// done := make(chan struct{})
+	// data := make(chan []byte)
+	log.Println("Juu")
+	p.download(p.Peers[0])
+	log.Println("Moi")
 }
 
 // NewProcess creates a new paused torrent process

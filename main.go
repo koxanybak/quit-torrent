@@ -8,7 +8,6 @@ import (
 )
 
 func main() {
-	// Read the torrent file
 	args := os.Args
 	if len(args) < 2 {
 		log.Fatal("Not enough arguments. Torrent file path should be the second arg.")
@@ -19,5 +18,5 @@ func main() {
 	if err != nil {
 		log.Fatal("Error creating a new process: ", err)
 	}
-	_ = process
+	process.Start()
 }
