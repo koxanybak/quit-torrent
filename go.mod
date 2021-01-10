@@ -1,4 +1,4 @@
-module github.com/koxanybak/torrent
+module github.com/koxanybak/quit-torrent
 
 go 1.15
 

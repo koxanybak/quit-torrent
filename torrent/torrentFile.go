@@ -89,7 +89,6 @@ func (t *TorrentFile) GetTrackerURL(peerID [20]byte, port int) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Println(len(peerID))
 	params := url.Values{
 		"info_hash":	[]string{string(t.InfoHash[:])},
 		"peer_id":		[]string{string(peerID[:])},

@@ -1,47 +1,34 @@
-package torrent
+package peerclient
 
 import (
 	"fmt"
-	"net"
-	"time"
 )
-
-
-func (p *Process) download(peer Peer) (error) {
-	fmt.Println("0")
-	conn, err := net.DialTimeout("tcp", peer.String(), 4*time.Second)
-	fmt.Println("1")
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-
-	sentHandshake := handshake{
-		Pstr: pstr,
-		InfoHash: p.Torrent.InfoHash,
-		PeerID: p.PeerID,
-	}
-	fmt.Println("2")
-	_, err = conn.Write(sentHandshake.Serialize())
-	if err != nil {
-		return err
-	}
-	fmt.Println("3")
-
-	if err := getAndValidateHandshakeFromPeer(conn, &sentHandshake); err != nil {
-		return err
-	}
-	fmt.Println("4")
-
-	return nil
-}
-
 
 type handshake struct {
 	Pstr			string
 	InfoHash		[20]byte
 	PeerID			[20]byte
 }
+
+// DoHandshake does the BitTorrent protocol handshake
+func (w *DownloadWorker) DoHandshake(infoHash [20]byte, peerID [20]byte) error {
+	sentHandshake := handshake{
+		Pstr: pstr,
+		InfoHash: infoHash,
+		PeerID: peerID,
+	}
+	_, err := w.Write(sentHandshake.Serialize())
+	if err != nil {
+		return err
+	}
+
+	if err := w.getAndValidateHandshakeFromPeer(&sentHandshake); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 var pstr string = "BitTorrent protocol"
 
 func (h *handshake) Serialize() []byte {
@@ -56,9 +43,9 @@ func (h *handshake) Serialize() []byte {
 	return buf
 }
 
-func getAndValidateHandshakeFromPeer(conn net.Conn, sentHandshake *handshake) (error) {
+func (w *DownloadWorker) getAndValidateHandshakeFromPeer(sentHandshake *handshake) (error) {
 	buf := make([]byte, len(pstr) + 49)
-	_, err := conn.Read(buf)
+	_, err := w.Read(buf)
 	if err != nil {
 		return err
 	}

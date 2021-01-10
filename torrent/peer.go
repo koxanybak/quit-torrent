@@ -25,7 +25,7 @@ type Peer struct {
 }
 
 func (p *Peer) String() string {
-	return fmt.Sprintf("%s:%d", p.String(), p.Port)
+	return fmt.Sprintf("%s:%d", p.IP.String(), p.Port)
 }
 
 func unmarshalPeers(peersBin []byte) ([]Peer, error) {

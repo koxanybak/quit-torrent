@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/koxanybak/torrent/torrent"
+	"github.com/koxanybak/quit-torrent/torrent"
 )
 
 func main() {
