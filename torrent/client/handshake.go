@@ -1,4 +1,4 @@
-package peerclient
+package client
 
 import (
 	"fmt"
@@ -11,18 +11,18 @@ type handshake struct {
 }
 
 // DoHandshake does the BitTorrent protocol handshake
-func (w *DownloadWorker) DoHandshake(infoHash [20]byte, peerID [20]byte) error {
+func (c *Client) DoHandshake(infoHash [20]byte, peerID [20]byte) error {
 	sentHandshake := handshake{
 		Pstr: pstr,
 		InfoHash: infoHash,
 		PeerID: peerID,
 	}
-	_, err := w.Write(sentHandshake.Serialize())
+	_, err := c.Conn.Write(sentHandshake.Serialize())
 	if err != nil {
 		return err
 	}
 
-	if err := w.getAndValidateHandshakeFromPeer(&sentHandshake); err != nil {
+	if err := c.getAndValidateHandshakeFromPeer(&sentHandshake); err != nil {
 		return err
 	}
 
@@ -43,9 +43,9 @@ func (h *handshake) Serialize() []byte {
 	return buf
 }
 
-func (w *DownloadWorker) getAndValidateHandshakeFromPeer(sentHandshake *handshake) (error) {
+func (c *Client) getAndValidateHandshakeFromPeer(sentHandshake *handshake) (error) {
 	buf := make([]byte, len(pstr) + 49)
-	_, err := w.Read(buf)
+	_, err := c.Conn.Read(buf)
 	if err != nil {
 		return err
 	}

@@ -1,4 +1,4 @@
-package torrent
+package peer
 
 import (
 	"encoding/binary"
@@ -7,9 +7,10 @@ import (
 	"net/http"
 
 	"github.com/zeebo/bencode"
+	"github.com/koxanybak/quit-torrent/torrent/file"
 )
 
-type todo struct {
+type trackerResponse struct {
 	Complete		uint64		`bencode:"complete"`
 	Downloaded		uint64		`bencode:"downloaded"`
 	Incomplete		uint64		`bencode:"incomplete"`
@@ -48,7 +49,7 @@ func unmarshalPeers(peersBin []byte) ([]Peer, error) {
 }
 
 // GetPeers returns
-func GetPeers(t *TorrentFile, peerID [20]byte) ([]Peer, error) {
+func GetPeers(t *file.TorrentFile, peerID [20]byte) ([]Peer, error) {
 	url, err := t.GetTrackerURL(peerID, 8001)
 	if err != nil {
 		return nil, err
@@ -60,7 +61,7 @@ func GetPeers(t *TorrentFile, peerID [20]byte) ([]Peer, error) {
 	}
 	defer resp.Body.Close()
 
-	var trackerData todo
+	var trackerData trackerResponse
 	if err := bencode.NewDecoder(resp.Body).Decode(&trackerData); err != nil {
 		return nil, err
 	}

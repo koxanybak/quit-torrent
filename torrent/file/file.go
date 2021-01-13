@@ -1,4 +1,4 @@
-package torrent
+package file
 
 import (
 	"bytes"
@@ -83,20 +83,34 @@ type TorrentFile struct {
 	Name		string
 }
 
+// BoundsForPieceAt calculates the byte indexes (begin, end) for a piece at index.
+// End not inclusive.
+func (tf *TorrentFile) BoundsForPieceAt(index int) (int, int) {
+	begin := index*int(tf.PieceLength)
+
+	var end int
+	end = begin + int(tf.PieceLength)
+	if end > int(tf.Length) {
+		end = int(tf.Length)
+	}
+
+	return begin, end
+}
+
 // GetTrackerURL returns the url of the tracking server
-func (t *TorrentFile) GetTrackerURL(peerID [20]byte, port int) (string, error) {
-	base, err := url.Parse(t.Announce)
+func (tf *TorrentFile) GetTrackerURL(peerID [20]byte, port int) (string, error) {
+	base, err := url.Parse(tf.Announce)
 	if err != nil {
 		return "", err
 	}
 	params := url.Values{
-		"info_hash":	[]string{string(t.InfoHash[:])},
+		"info_hash":	[]string{string(tf.InfoHash[:])},
 		"peer_id":		[]string{string(peerID[:])},
 		"port":			[]string{strconv.Itoa(port)},
 		"uploaded":		[]string{"0"},
 		"downloaded":	[]string{"0"},
 		"compact":		[]string{"1"},
-		"left":			[]string{strconv.Itoa(int(t.Length))},
+		"left":			[]string{strconv.Itoa(int(tf.Length))},
 	}
 	base.RawQuery = params.Encode()
 	return base.String(), nil
