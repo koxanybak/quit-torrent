@@ -3,6 +3,7 @@ package file
 import (
 	"bytes"
 	"crypto/sha1"
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -99,10 +100,15 @@ func (tf *TorrentFile) BoundsForPieceAt(index int) (int, int) {
 
 // GetTrackerURL returns the url of the tracking server
 func (tf *TorrentFile) GetTrackerURL(peerID [20]byte, port int) (string, error) {
+	if (tf.Announce == "") {
+		return "", errors.New("No tracker URL in the .torrent file. This client doesn't support trackerless torrents")
+	}
+
 	base, err := url.Parse(tf.Announce)
 	if err != nil {
 		return "", err
 	}
+
 	params := url.Values{
 		"info_hash":	[]string{string(tf.InfoHash[:])},
 		"peer_id":		[]string{string(peerID[:])},
@@ -113,6 +119,7 @@ func (tf *TorrentFile) GetTrackerURL(peerID [20]byte, port int) (string, error) 
 		"left":			[]string{strconv.Itoa(int(tf.Length))},
 	}
 	base.RawQuery = params.Encode()
+	
 	return base.String(), nil
 }
 

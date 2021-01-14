@@ -1,2 +1,2 @@
-Don't use this to torrent anything illegal or I'll be angry. >:(
+Due to ethical and legal reasons, you should stick to legal torrents when using this client.
 

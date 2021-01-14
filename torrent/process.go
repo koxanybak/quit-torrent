@@ -20,6 +20,7 @@ type Process struct {
 	Peers			[]peer.Peer
 
 	paused			bool
+	downloaded		int
 }
 
 // Start starts the torrent process
@@ -45,8 +46,6 @@ func (p *Process) Start() {
 				return
 			}
 
-			// TODO: EOF when establishing handshake and keep alive message from peer nil reference
-
 			err = download.StartWorker(client, workque, results)
 			if err != nil {
 				log.Printf("Downloading failed with peer %v because %v\n", peer.IP, err)
@@ -59,7 +58,10 @@ func (p *Process) Start() {
 		if err := saver.Save(res); err != nil {
 			log.Panicf("Error saving downloaded piece %d\n", res.Index)
 		}
-		log.Printf("Successfully downloaded piece %d with %d peers\n", res.Index, runtime.NumGoroutine() - 1)
+		p.downloaded += len(res.Data)
+		percentage := float64(p.downloaded) / float64(p.Torrent.Length) * 100
+
+		log.Printf("(%.2f%%) Successfully downloaded piece #%d with %d peers\n", percentage, res.Index, runtime.NumGoroutine() - 1)
 	}
 }
 

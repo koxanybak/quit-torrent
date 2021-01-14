@@ -122,13 +122,20 @@ func StartWorker(client *client.Client, workque chan *piece.Work, results chan *
 		}
 		//fmt.Printf("Peer %v had the piece of index %d. Starting a download...\n", client.Peer.IP, pw.Index)
 
-		_, err := download(client, pw)
+		data, err := download(client, pw)
 		if err != nil {
 			workque <- pw
 			return err
 		}
 
-		log.Printf("Successfully downloaded piece %d\n", pw.Index)
+		res := piece.NewResult(pw, data)
+
+		if !piece.HashesMatch(pw, res) {
+			workque <- pw
+			return fmt.Errorf("Hash of the downloaded piece %d didn't match", res.Index)
+		}
+
+		results <- res
 	}
 
 	return nil

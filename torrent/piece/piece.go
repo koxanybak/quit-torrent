@@ -1,6 +1,8 @@
 package piece
 
 import (
+	"bytes"
+	"crypto/sha1"
 	"encoding/binary"
 	"fmt"
 
@@ -42,10 +44,27 @@ type Payload struct {
 
 // Result represents a downloaded piece
 type Result struct {
-	Length		uint32
-	Begin		uint32
-	Index		uint32
-	Block		[]byte
+	Length		int
+	Index		int
+	Data		[]byte
+	Begin		int
+	End			int
+}
+
+// NewResult creates a new downloaded piece from the 'piecework' and downloaded data
+func NewResult(pw *Work, data []byte) *Result {
+	return &Result{
+		Data: data,
+		Begin: pw.Begin,
+		End: pw.End,
+		Index: pw.Index,
+	}
+}
+
+// HashesMatch checks if the hashes of the work and result match
+func HashesMatch(pw *Work, pr *Result) bool {
+	resultHash := sha1.Sum(pr.Data)
+	return bytes.Equal(resultHash[:], pw.Hash[:])
 }
 
 // UnmarshalPiecePayload turns payload data into a piece
